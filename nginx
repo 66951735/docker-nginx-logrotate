@@ -1,0 +1,15 @@
+/log/*.log {
+  su nginx root # 切换用户，解决可能存在的文件权限问题，根据实际环境配置
+  daily # 按天切割日志
+  missingok # 忽略错误
+  rotate 7 # 保留最近的7个文件
+  ifempty # 空文件也切割
+  create 640 nginx root # 创建640的日志文件
+  sharedscripts # 多个日志文件共享配置脚本
+  dateext # 按日期命名切分后的日志文件，默认为`文件名-%Y%m%d`，目前支持到小时，不支持分和秒的命名
+  postrotate # 日志切分后执行的脚本，用于通知写日志的服务重新定位日志文件，nginx kill -USR1信号为重新打开日志文件
+    if [ -f /var/run/nginx.pid ]; then
+      kill -USR1 `cat /var/run/nginx.pid`
+    fi
+  endscript
+}
